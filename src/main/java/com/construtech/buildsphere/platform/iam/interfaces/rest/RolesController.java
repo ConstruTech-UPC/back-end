@@ -1,0 +1,52 @@
+package com.construtech.buildsphere.platform.iam.interfaces.rest;
+
+import com.construtech.buildsphere.platform.iam.domain.model.queries.GetAllRolesQuery;
+import com.construtech.buildsphere.platform.iam.domain.services.RoleQueryService;
+import com.construtech.buildsphere.platform.iam.interfaces.rest.resources.RoleResource;
+import com.construtech.buildsphere.platform.iam.interfaces.rest.transform.RoleTransform;
+import com.construtech.buildsphere.platform.iam.domain.model.entities.Role;
+import com.construtech.buildsphere.platform.iam.domain.model.queries.GetRoleByIdQuery;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping(value = "/api/v1/roles", produces = MediaType.APPLICATION_JSON_VALUE)
+@Tag(name = "Roles", description = "Role Management Endpoints")
+public class RolesController {
+    private final RoleQueryService roleQueryService;
+
+    public RolesController(RoleQueryService roleQueryService) {
+        this.roleQueryService = roleQueryService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<RoleResource>> getAllRoles() {
+        var getAllRolesQuery = new GetAllRolesQuery();
+        var roles = roleQueryService.handle(getAllRolesQuery);
+        var roleResources = roles.stream().map(RoleTransform::toResourceFromEntity).toList();
+        return ResponseEntity.ok(roleResources);
+    }
+
+    @PostMapping
+    public ResponseEntity<RoleResource> createRole(@RequestBody RoleResource roleResource) {
+        var role = Role.toRoleFromName(roleResource.getName());
+        var roleResourceCreated = RoleTransform.toResourceFromEntity(role);
+        return ResponseEntity.ok(roleResourceCreated);
+    }
+
+    @GetMapping(value = "/{roleId}")
+    public ResponseEntity<RoleResource> getRoleById(@PathVariable Long roleId) {
+        var getRoleByIdQuery = new GetRoleByIdQuery(roleId);
+        var role = roleQueryService.handle(getRoleByIdQuery);
+        if (role.isEmpty()) return ResponseEntity.notFound().build();
+        var roleResource = RoleTransform.toResourceFromEntity(role.get());
+        return ResponseEntity.ok(roleResource);
+    }
+
+
+
+}

@@ -1,4 +1,6 @@
 package com.construtech.buildsphere.platform.iam.domain.model.valueobjects;
 
-public record Roles() {
+public enum Roles {
+    ROLE_ADMIN,
+    ROLE_USER
 }

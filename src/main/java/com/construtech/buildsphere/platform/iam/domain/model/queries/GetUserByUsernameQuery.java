@@ -1,4 +1,4 @@
 package com.construtech.buildsphere.platform.iam.domain.model.queries;
 
-public record GetUserByUsernameQuery() {
+public record GetUserByUsernameQuery(String username) {
 }
